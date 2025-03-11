@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Contraseñas Seguras</title>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+        .password-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #eee;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        input[type="text"] {
+            border: none;
+            background: none;
+            width: 100%;
+            outline: none;
+            padding: 5px;
+        }
+        button {
+            background: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px;
+            margin-top: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            width: 100%;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .options {
+            text-align: left;
+            margin: 10px 0;
+        }
+        .strength-indicator {
+            height: 5px;
+            background: lightgray;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Generador de Contraseñas</h1>
+        <div class="password-container">
+            <input type="text" id="password" readonly>
+            <button id="copyBtn" title="Copiar contraseña"><i class="fas fa-copy"></i></button>
+        </div>
+        <div class="strength-indicator" id="strengthIndicator"></div>
+        <div class="options">
+            <label>Longitud: <span id="lengthValue">12</span></label>
+            <input type="range" id="length" min="8" max="32" value="12">
+            <label><input type="checkbox" id="uppercase" checked> Incluir mayúsculas</label>
+            <label><input type="checkbox" id="lowercase" checked> Incluir minúsculas</label>
+            <label><input type="checkbox" id="numbers" checked> Incluir números</label>
+            <label><input type="checkbox" id="symbols" checked> Incluir símbolos</label>
+        </div>
+        <button id="generate">Generar Contraseña</button>
+        <button id="togglePassword" title="Mostrar/Ocultar contraseña"><i class="fas fa-eye"></i></button>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const passwordField = document.getElementById("password");
+            const copyBtn = document.getElementById("copyBtn");
+            const generateBtn = document.getElementById("generate");
+            const togglePasswordBtn = document.getElementById("togglePassword");
+            const lengthInput = document.getElementById("length");
+            const lengthValue = document.getElementById("lengthValue");
+            const uppercaseCheckbox = document.getElementById("uppercase");
+            const lowercaseCheckbox = document.getElementById("lowercase");
+            const numbersCheckbox = document.getElementById("numbers");
+            const symbolsCheckbox = document.getElementById("symbols");
+            const strengthIndicator = document.getElementById("strengthIndicator");
+
+            const characters = {
+                uppercase: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+                lowercase: "abcdefghijklmnopqrstuvwxyz",
+                numbers: "0123456789",
+                symbols: "!@#$%^&*()_-+=<>?/{}~"
+            };
+
+            function generatePassword() {
+                let length = lengthInput.value;
+                let charset = "";
+                let password = "";
+
+                if (uppercaseCheckbox.checked) charset += characters.uppercase;
+                if (lowercaseCheckbox.checked) charset += characters.lowercase;
+                if (numbersCheckbox.checked) charset += characters.numbers;
+                if (symbolsCheckbox.checked) charset += characters.symbols;
+
+                if (!charset) return;
+
+                for (let i = 0; i < length; i++) {
+                    let randomIndex = Math.floor(Math.random() * charset.length);
+                    password += charset[randomIndex];
+                }
+                
+                passwordField.value = password;
+                updateStrengthIndicator(password);
+            }
+
+            function copyToClipboard() {
+                passwordField.select();
+                document.execCommand("copy");
+                alert("Contraseña copiada al portapapeles");
+            }
+
+            function updateStrengthIndicator(password) {
+                let strength = 0;
+                if (/[A-Z]/.test(password)) strength++;
+                if (/[a-z]/.test(password)) strength++;
+                if (/[0-9]/.test(password)) strength++;
+                if (/[^A-Za-z0-9]/.test(password)) strength++;
+                
+                let colors = ["red", "orange", "yellow", "green"];
+                strengthIndicator.style.background = colors[strength - 1] || "lightgray";
+            }
+
+            function togglePasswordVisibility() {
+                passwordField.type = passwordField.type === "text" ? "password" : "text";
+                togglePasswordBtn.innerHTML = passwordField.type === "text" ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+            }
+
+            lengthInput.addEventListener("input", () => lengthValue.textContent = lengthInput.value);
+            generateBtn.addEventListener("click", generatePassword);
+            copyBtn.addEventListener("click", copyToClipboard);
+            togglePasswordBtn.addEventListener("click", togglePasswordVisibility);
+            
+            generatePassword();
+        });
+    </script>
+</body>
+</html>
